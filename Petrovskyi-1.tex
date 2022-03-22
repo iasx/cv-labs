@@ -1,0 +1,149 @@
+\documentclass{/home/alx/Documents/LaTex/nulp}
+
+\begin{document}
+
+\Uttl{Лабораторна Робота №1}{Обробка зображень методами штучного інтелекту}{13}{Пелешко Д.Д.}
+
+\paragraph*{\textit{Тема}} Попередня обробка зображень.
+
+\paragraph*{\textit{Мета}} Вивчити просторову фільтрацію зображень, методи мінімізації шуму, морфології, виділення країв і границь та елементи біблотеки
+OpenCV для розвязання цих завдань.
+
+\justify
+
+\section*{Хід роботи}
+\begin{enumerate}
+\item Вибрати з інтернету два зображення з різною деталізацією об’єктів та два зображення з різним контрастом.
+\item Виконати детекцію границь на зображеннях за допомогою операторів Sobel,
+Prewitt.
+\item Провести порівняльний аналіз.
+\end{enumerate}
+
+\newpage
+
+\section*{1. Вибір зображень}
+
+Для того, щоб відмнінності роботи методів детекції границь були більш помітними, було вирішено обрати 1 картинку і власноруч підвищити/знизити контрастність та деталізацію.
+
+\begin{center}
+\Uimg{10}{img/original.jpg}
+
+\textit{Рис.1 Оригінальне зображення}
+\end{center}
+
+\begin{center}
+\Uimg{10}{img/low.png}
+
+\textit{Рис.2 Низька контрастність}
+\end{center}
+
+\begin{center}
+\Uimg{10}{img/high.png}
+
+\textit{Рис.3 Висока контрастність}
+\end{center}
+
+\begin{center}
+\Uimg{10}{img/soft.png}
+
+\textit{Рис.4 Низька деталізація}
+\end{center}
+
+\begin{center}
+\Uimg{10}{img/sharp.png}
+
+\textit{Рис.5 Висока деталізація}
+\end{center}
+
+\newpage
+
+\section*{2. Методи детекції}
+
+Наступним кроком була реалізація методів детекціі границь операторами Собеля і Прюітт.
+
+\begin{verbatim}
+def Sobel(A):
+    # kernel for tracking horizontal changes
+    Kx = pl.array([
+        [-1, 0, +1],
+        [-2, 0, +2],
+        [-1, 0, +1],
+    ])
+
+    # kernel for tracking vertical changes
+    Ky = pl.array([
+        [+1, +2, +1],
+        [0,  0,  0],
+        [-1, -2, -1],
+    ])
+
+    # partial gradient magnitudes
+    Gx = convolve2d(A, Kx, mode='valid')
+    Gy = convolve2d(A, Ky, mode='valid')
+
+    # full gradient magnitude
+    G = pl.sqrt(pl.square(Gx) + pl.square(Gy))
+    G *= 255.0 / G.max()
+
+    return G
+\end{verbatim}
+
+\newpage
+
+\begin{verbatim}
+def Prewitt(A):
+    # kernel for tracking horizontal changes
+    Kx = pl.array([
+        [+1, 0, -1],
+        [+1, 0, -1],
+        [+1, 0, -1],
+    ])
+
+    # kernel for tracking vertical changes
+    Ky = pl.array([
+        [+1, +1, +1],
+        [0,  0,  0],
+        [-1, -1, -1],
+    ])
+
+    # partial gradient magnitudes
+    Gx = convolve2d(A, Kx, mode='valid')
+    Gy = convolve2d(A, Ky, mode='valid')
+
+    # full gradient magnitude
+    G = pl.sqrt(pl.square(Gx) + pl.square(Gy))
+    G *= 255.0 / G.max()
+
+    return G
+\end{verbatim}
+
+Завантаження картинок і перетворення до вигляду grayscale відбувається з використанням бібліотеки OpenCV.
+
+\begin{verbatim}
+high = cv2.imread('img/high.png', 0)
+low = cv2.imread('img/low.png', 0)
+sharp = cv2.imread('img/sharp.png', 0)
+soft = cv2.imread('img/soft.png', 0)
+\end{verbatim}
+
+\section*{Робота программи}
+
+Після запуску результати детекції границь двома методами будуть послідовно виведені для кожної з картинок.
+
+\begin{center}
+\Uimg{10}{1.png}
+
+\textit{Рис.6 Результати детекції}
+\end{center}
+
+\section*{Аналіз}
+
+Оператори Собеля і Прюітт однаково застосовуються для визначення границь зображення шляхом знаходження градієнтів в вертикальному та горизонтальному напрямках з подальшим їх накладанням. Єдина їх відмінність - це ядро згортки. У операторі Прюітт крайні горизонтальні і вертикальні ряди містять одиницю, а в операторі Собеля по центру ненульових рядків стоять двійки, що робить акцент на пікселях, які ближче до центру фільтра.
+
+У ході візуальних порівнянь обох методів було виявлено, що границі, отримані в результаті застосування методу Собеля трохи світліші (за рахунок двійок у ядрі), проте суттєвих відмінностей між результатами детекції границь не було помічено.
+
+\section*{Висновки}
+У результаті виконання лабораторної роботи я вивчив просторову фільтрацію зображень, методи мінімізації шуму, морфології, виділення країв і границь та елементи біблотеки OpenCV для розвязання цих завдань.
+
+\end{document}
+
