@@ -21,7 +21,6 @@ if len(sys.argv) != 3:
 I1 = load(sys.argv[1])
 I2 = load(sys.argv[2])
 
-# Compute PCA-SIFT keypoints and descriptors
 K1, D1 = computeKeypointsAndDescriptors(I1)
 K2, D2 = computeKeypointsAndDescriptors(I2)
 
@@ -30,7 +29,6 @@ K2, D2 = computeKeypointsAndDescriptors(I2)
 flann = cv.FlannBasedMatcher({'algorithm': 0, 'trees': 5}, {'checks': 50})
 matches = flann.knnMatch(D1, D2, k=2)
 
-# Lowe's ratio test
 good = []
 for m, n in matches:
     if m.distance < 0.7 * n.distance:

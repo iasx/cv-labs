@@ -420,10 +420,6 @@ def generateDescriptors(keypoints, gaussian_images, window_width=4, num_bins=8, 
 
         # Remove histogram borders
         descriptor_vector = histogram_tensor[1:-1, 1:-1, :].flatten()
-        # Principal component analysis (PCA) for feature extraction
-        descriptor_vectоr_covariance = cov(descriptor_vector)
-        _, descriptor_vectоr = PCACompute(descriptor_vectоr_covariance,
-                                          mean(descriptor_vectоr_covariance).reshape(1, -1), maxComponents=20)
         # Threshold and normalize descriptor_vector
         threshold = norm(descriptor_vector) * descriptor_max_value
         descriptor_vector[descriptor_vector > threshold] = threshold
@@ -433,4 +429,9 @@ def generateDescriptors(keypoints, gaussian_images, window_width=4, num_bins=8, 
         descriptor_vector[descriptor_vector < 0] = 0
         descriptor_vector[descriptor_vector > 255] = 255
         descriptors.append(descriptor_vector)
+        # Principal component analysis (PCA) for feature extraction
+        descriptors_covariance = cov(descriptors)
+        _, descriptors = PCACompute(descriptors_covariance,
+                                    mean(descriptors_covariance).reshape(1, -1),
+                                    maxComponents=20)
     return array(descriptors, dtype='float32')
