@@ -1,0 +1,130 @@
+\documentclass{/home/alx/Documents/LaTex/nulp}
+
+\begin{document}
+
+\Uttl{Лабораторна Робота №3}{Обробка зображень методами штучного інтелекту}{13}{Пелешко Д.Д.}
+
+\paragraph*{\textit{Тема}} Класифікація зображень.
+Застосування нейромереж для пошуку подібних зображень.
+
+\paragraph*{\textit{Мета}} Набути практичних навиків у розв’язанні задачі пошуку подібних зображень на прикладі організації CNN класифікації.
+
+\justify
+
+\section*{Завдання}
+
+Побудувати CNN на основі \textbf{AlexNet} для класифікації зображень на основідатасету fashion-mnist. Зробити налаштування моделі для досягнення необхідної точності. На базі Siamese networks побудувати систему для пошуку подібних зображень в датасеті fashion-mnist. Візуалізувати отримані результати t-SNE.
+
+
+\newpage
+
+\section*{1. AlexNet}
+
+Нейронна мережа AlexNet складається з 8 шарів: перших 5 - згорткові (використовуються для виділення фіч), останніх 3 - лінійні (використовуються для знаходження закономіронстей і визначення результуючого класу).
+
+\begin{verbatim}
+AlexNet = Sequential()
+
+AlexNet.add(Conv2D(filters=96, input_shape=x_train.shape[1:],
+    kernel_size=(11,11), strides=(4,4), padding='same'))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('relu'))
+AlexNet.add(MaxPooling2D(pool_size=(2,2), strides=(2,2),
+    padding='same'))
+
+AlexNet.add(Conv2D(filters=256, kernel_size=(5, 5), strides=(1,1),
+    padding='same'))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('relu'))
+AlexNet.add(MaxPooling2D(pool_size=(2,2), strides=(2,2),
+    padding='same'))
+
+AlexNet.add(Conv2D(filters=384, kernel_size=(3,3), strides=(1,1),
+    padding='same'))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('relu'))
+
+AlexNet.add(Conv2D(filters=384, kernel_size=(3,3), strides=(1,1),
+    padding='same'))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('relu'))
+
+AlexNet.add(Conv2D(filters=256, kernel_size=(3,3), strides=(1,1),
+    padding='same'))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('relu'))
+AlexNet.add(MaxPooling2D(pool_size=(2,2), strides=(2,2),
+    padding='same'))
+
+AlexNet.add(Flatten())
+AlexNet.add(Dense(4096, input_shape=(32,32,3,)))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('relu'))
+AlexNet.add(Dropout(0.4))
+
+AlexNet.add(Dense(4096))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('relu'))
+AlexNet.add(Dropout(0.4))
+
+AlexNet.add(Dense(1000))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('relu'))
+AlexNet.add(Dropout(0.4))
+
+AlexNet.add(Dense(10))
+AlexNet.add(BatchNormalization())
+AlexNet.add(Activation('softmax'))
+\end{verbatim}
+
+\section*{2. Siamese Networks}
+
+Сіамські мережі побудовані наступним чином: використовуються 2 AlexNet з окремими входами, спільним виходом і вагами. На виході кожна AlexNet продукує вектори передбачень, які можна порівнювати між собою з метою визначення схожості вхідних зображень.
+
+\begin{verbatim}
+img_a_in = Input(shape=x_train.shape[1:], name='ImageA_Input')
+img_b_in = Input(shape=x_train.shape[1:], name='ImageB_Input')
+img_a_feat = AlexNet(img_a_in)
+img_b_feat = AlexNet(img_b_in)
+combined_features = concatenate(
+    [img_a_feat, img_b_feat], name='merge_features')
+combined_features = Dense(16, activation='linear')(combined_features)
+combined_features = BatchNormalization()(combined_features)
+combined_features = Activation('relu')(combined_features)
+combined_features = Dense(4, activation='linear')(combined_features)
+combined_features = BatchNormalization()(combined_features)
+combined_features = Activation('relu')(combined_features)
+combined_features = Dense(1, activation='sigmoid')(combined_features)
+similarity_model = Model(inputs=[img_a_in, img_b_in], outputs=[
+                         combined_features], name='Similarity_Model')
+\end{verbatim}
+
+\section*{3. Експериментальна частина}
+
+Випадково ініціалізовані сіамські мережі не дали ніякого корисного результату.
+
+\begin{center}
+\Uimg{6}{1.png}
+\end{center}
+
+Проте після 25 епох тренування моделлю була досягнута точність близька до 80\%.
+
+\begin{center}
+\Uimg{3}{5.png}
+\end{center}
+
+\begin{center}
+\Uimg{6}{2.png}
+\end{center}
+
+Використання t-SNE продемонструвало, що моделі, що генерували фічі (AlexNet), змогли досить добре виокремити ознаки чобіт, пуловерів, штанів, сумок, сандалей та кросівок (які є візуально відмінними і легшими до розрізнення). Проте, вони з меншою впевненістю розрізняють сукні, плащі, сорочки і футболки (ймовірно через зовнішню схожість). Також деякі плаття плутаються з сумками.
+
+\begin{center}
+\Uimg{8}{4.png}
+\end{center}
+
+\section*{Висновки}
+У результаті виконання лабораторної роботи я набув практичних навиків у розв’язанні задачі пошуку подібних зображень на прикладі організації CNN класифікації.
+
+\end{document}
+
